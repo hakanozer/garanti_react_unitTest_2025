@@ -47,6 +47,7 @@
     "@types/react-dom": "^19.1.6",
     "ajv": "^7.2.4",
     "jest": "^30.0.3",
+    "jest-environment-jsdom": "^30.0.2",
     "msw": "^2.10.2",
     "ts-jest": "^29.4.0",
     "typescript": "^5.8.3"

@@ -1,8 +1,17 @@
 import React from 'react'
+import CustomButton from '../../components/CustomButton'
 
 function Login() {
+
+  const handleClick = () => {
+    console.log('Button clicked!')
+  }
+
   return (
-    <div>Login</div>
+    <>
+      <h1>Login</h1>
+      <CustomButton onClick={handleClick} />
+    </>
   )
 }
 
