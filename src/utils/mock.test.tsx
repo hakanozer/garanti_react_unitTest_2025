@@ -1,70 +1,97 @@
+// test/utils/mock.test.tsx
 import '@testing-library/jest-dom';
-import React from "react";
-import { fireEvent, render, waitFor, screen } from "@testing-library/react";
+import { fireEvent, render, waitFor, screen, act, renderHook } from "@testing-library/react";
 import CustomButton from "../components/CustomButton";
-
-// api service call
 import * as commentService from '../services/commentsService';
-import { commentMockData } from "./mockData";
-import { Axios, AxiosResponse } from "axios";
+import { commentMockData, productMockData } from "./mockData";
+import { AxiosResponse } from "axios";
 import { IComment } from "../models/IComment";
 import Login from "../pages/users/Login";
+import { useCounter } from '../hooks/useCounter';
+import { ThemeContext } from '../themeContext/ThemeContext';
+//import { setupServer } from 'msw/node';
+//import { rest } from 'msw';
 
-jest.useFakeTimers()
+/*
+const server = setupServer(
+  rest.get('https://jsonbulut.com/api/products?page=1&per_page=10', (req:any, res:any, ctx:any) => {
+    return res(ctx.json(productMockData.data[0]))
+  })
+);
+
+beforeAll(() => server.listen());
+afterEach(() => server.resetHandlers());
+afterAll(() => server.close());
+*/
+
+jest.useFakeTimers();
+
 describe('mock test', () => { 
 
   it('click event control', () => {
-    const mockOnClick = jest.fn()
-    const obj = render( <CustomButton onClick={mockOnClick} /> )
-    const button = obj.getByText('Send') as HTMLButtonElement
+    const mockOnClick = jest.fn();
+    const { getByText } = render(<CustomButton onClick={mockOnClick} />);
+    const button = getByText('Send') as HTMLButtonElement;
 
-    // Mock Click
-    fireEvent.click(button)
+    fireEvent.click(button);
 
-    expect(mockOnClick).toHaveBeenCalled() // Mock fonsiyon çağrıldı mı?
-    expect(mockOnClick).toHaveBeenCalledTimes(1) // Kaç kere çağrıldı!
-
-    const color = button.style.backgroundColor
-    expect(color).toBe("")
-
-  })
+    expect(mockOnClick).toHaveBeenCalledTimes(1);
+    expect(button.style.backgroundColor).toBe("");
+  });
 
   it('load api comment test', async () => {
-
     jest.spyOn(commentService, "getOneComment").mockResolvedValue({ data: commentMockData } as AxiosResponse<IComment, any>);
-    const { getByText, getByTestId } = render(<Login />)
-    fireEvent.click(getByText('Load Comment'))
+    render(<Login />);
+    fireEvent.click(screen.getByText('Load Comment'));
 
     await waitFor(() => {
-      expect(getByTestId('comment')).toHaveTextContent(commentMockData.data.name)
-    })
-    expect(commentService.getOneComment).toHaveBeenCalledWith(1) // getOneComment fonksiyonu 1 parametresi ile çağrıldı mı?
-    expect(commentService.getOneComment).toHaveBeenCalledTimes(1) // getOneComment fonksiyonu kaç kere çağrıldı?
-  })
+      expect(screen.getByTestId('comment')).toHaveTextContent(commentMockData.data.name);
+    });
+
+    expect(commentService.getOneComment).toHaveBeenCalledWith(1);
+    expect(commentService.getOneComment).toHaveBeenCalledTimes(1);
+  });
 
   it('useEffect message test', async () => {
-    /*
-    render(<Login />)
-    jest.advanceTimersByTime(3000)
-    const message = await screen.findByText("Hello, message from useEffect!")
-    expect(message).toBeInTheDocument()
-    */
-   const {getByTestId} = render(<Login />)
-   jest.advanceTimersByTime(3000)
-   await waitFor(() => {
-    expect(getByTestId('message')).toHaveTextContent("Hello, message from useEffect!")
-   })
-  })
+    render(<Login />);
+    jest.advanceTimersByTime(3000);
+    await waitFor(() => {
+      expect(screen.getByTestId('message')).toHaveTextContent("Hello, message from useEffect!");
+    });
+  });
 
   it('form valid control', () => {
-    render(<Login />)
-    const emailObj = screen.getByPlaceholderText('E-Mail')
-    fireEvent.change( emailObj, {target: {value: 'ali@mail'}} )
-    const buttonObj = screen.getByTestId('loginBtn')
-    fireEvent.click(buttonObj)
-    const errorObj = screen.getByRole('alert')
+    render(<Login />);
+    const emailInput = screen.getByPlaceholderText('E-Mail');
+    fireEvent.change(emailInput, { target: { value: 'ali@mail' } });
+    const loginBtn = screen.getByTestId('loginBtn');
+    fireEvent.click(loginBtn);
+    const error = screen.getByRole('alert');
+    expect(error).toHaveTextContent('E-mail not valid');
+  });
 
-    expect(errorObj).toHaveTextContent('E-mail not valid')
+  it('mock api product test', async () => {
+    render(<Login />);
+    const loadingTexts = await screen.findAllByText('Yükleniyor...');
+    expect(loadingTexts.length).toBeGreaterThan(0); 
+  });
+
+  it('custom hooks test', () => {
+    const {result} = renderHook(() => useCounter())
+    act(() => {
+      result.current.plus()
+    })
+    expect(result.current.count).toBe(1)
   })
 
-})
+  it("context api test", () => {
+    const renderObj = 
+    <ThemeContext.Provider value='dark'>
+      <Login />
+    </ThemeContext.Provider>
+    render(renderObj)
+    expect(screen.getByText('dark')).toBeInTheDocument()
+  })
+  
+
+});

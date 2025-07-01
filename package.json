@@ -4,6 +4,7 @@
   "private": true,
   "dependencies": {
     "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react-hooks": "^8.0.1",
     "@testing-library/user-event": "^13.5.0",
     "@types/node": "^16.18.126",
     "axios": "^1.10.0",
@@ -20,7 +21,8 @@
     "test:utils": "jest src/utils/util.test.ts --watchAll=false",
     "test:security": "jest src/security/userSecurity.test.ts --watchAll=false",
     "test:utilFolder": "jest src/utils --watchAll=false",
-    "test:securityFolder": "jest src/security --watchAll=false"
+    "test:securityFolder": "jest src/security --watchAll=false",
+    "allTest": "jest --coverage"
   },
   "eslintConfig": {
     "extends": [
@@ -51,6 +53,8 @@
     "jest-environment-jsdom": "^30.0.2",
     "msw": "^2.10.2",
     "ts-jest": "^29.4.0",
-    "typescript": "^5.8.3"
+    "typescript": "^5.8.3",
+    "vitest": "^3.2.4",
+    "whatwg-fetch": "^3.6.20"
   }
 }
